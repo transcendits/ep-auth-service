@@ -109,3 +109,4 @@ Use the issued credentials with `POST /auth/token/generateb2b`:
   "audience": "b2b"
 }
 ```
+# ep-auth-service
