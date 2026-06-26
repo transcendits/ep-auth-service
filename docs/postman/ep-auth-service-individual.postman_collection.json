@@ -1,0 +1,302 @@
+{
+  "info": {
+    "_postman_id": "bd1e3f6b-32a8-4e49-b07b-epauthsingle",
+    "name": "ep-auth-service - Individual Requests",
+    "description": "No-auth intranet Postman collection. Each request is set up to run manually by itself with concrete sample bodies. For Change Password, paste the temporaryPassword returned by Onboard User.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "Provision Tenant",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"name\": \"Acme Tenant\"\n}"
+        },
+        "url": "{{baseUrl}}/internal/tenants/provision"
+      }
+    },
+    {
+      "name": "Onboard User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "if (body.userId) pm.collectionVariables.set('userId', body.userId);",
+              "if (body.email) pm.collectionVariables.set('userEmail', body.email);",
+              "if (body.temporaryPassword) pm.collectionVariables.set('temporaryPassword', body.temporaryPassword);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"orgId\": \"{{orgId}}\",\n  \"email\": \"postman.individual.{{$timestamp}}@example.com\",\n  \"profileName\": \"EMPLOYEE\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/user/onboard"
+      }
+    },
+    {
+      "name": "Change Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"email\": \"{{userEmail}}\",\n  \"temporaryPassword\": \"{{temporaryPassword}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/user/changepassword"
+      }
+    },
+    {
+      "name": "Login Existing User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+              "if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"email\": \"{{existingUserEmail}}\",\n  \"password\": \"{{existingUserPassword}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/user/login"
+      }
+    },
+    {
+      "name": "Forgot Password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const body = pm.response.json();",
+              "if (body.temporaryPassword) pm.collectionVariables.set('temporaryPassword', body.temporaryPassword);",
+              "if (body.email) pm.collectionVariables.set('userEmail', body.email);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"email\": \"{{existingUserEmail}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/user/forgotpassword"
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/token/refresh"
+      }
+    },
+    {
+      "name": "Invalidate Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": "{{baseUrl}}/auth/token/invalidate"
+      }
+    },
+    {
+      "name": "JWKS",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/auth/.well-known/jwks.json"
+      }
+    },
+    {
+      "name": "List Profiles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/profiles?tenantId={{tenantId}}"
+      }
+    },
+    {
+      "name": "List Permissions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/permissions"
+      }
+    },
+    {
+      "name": "Assign Profile To User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"profileId\": \"{{profileId}}\"\n}"
+        },
+        "url": "{{baseUrl}}/assignprofiletouser"
+      }
+    },
+    {
+      "name": "Generate B2B Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"audience\": \"b2b-client\"\n}"
+        },
+        "url": "{{baseUrl}}/generateb2b"
+      }
+    },
+    {
+      "name": "Generate B2C Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"audience\": \"b2c-client\"\n}"
+        },
+        "url": "{{baseUrl}}/generateb2c"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "tenantId",
+      "value": "11111111-1111-1111-1111-111111111111"
+    },
+    {
+      "key": "orgId",
+      "value": "22222222-2222-2222-2222-222222222222"
+    },
+    {
+      "key": "existingUserEmail",
+      "value": "postman.user.20260606112251@example.com"
+    },
+    {
+      "key": "existingUserPassword",
+      "value": "Password123!"
+    },
+    {
+      "key": "newPassword",
+      "value": "Password123!"
+    },
+    {
+      "key": "userEmail",
+      "value": ""
+    },
+    {
+      "key": "temporaryPassword",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "f1be4aa8-3fdc-4283-89f6-42d06831a1d9"
+    },
+    {
+      "key": "profileId",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ]
+}

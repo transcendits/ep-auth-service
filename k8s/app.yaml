@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ep-auth-service
+  namespace: ep-auth
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ep-auth-service
+  template:
+    metadata:
+      labels:
+        app: ep-auth-service
+    spec:
+      containers:
+        - name: ep-auth-service
+          image: ep-auth-service:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: ep-auth-config
+            - secretRef:
+                name: ep-auth-secret
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ep-auth-service
+  namespace: ep-auth
+spec:
+  selector:
+    app: ep-auth-service
+  ports:
+    - port: 80
+      targetPort: 8080

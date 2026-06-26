@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ep-auth-config
+  namespace: ep-auth
+data:
+  SERVER_PORT: "8080"
+  DB_URL: jdbc:postgresql://postgres:5432/ep_auth
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  JWT_ISSUER: ep-auth-service

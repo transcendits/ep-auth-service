@@ -1,0 +1,40 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ep-auth-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ep_auth}
+    username: ${DB_USERNAME:ep_auth}
+    password: ${DB_PASSWORD:ep_auth}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+
+app:
+  jwt:
+    issuer: ${JWT_ISSUER:ep-auth-service}
+    access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
+    refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:30}
+  security:
+    max-failed-login-attempts: ${MAX_FAILED_LOGIN_ATTEMPTS:5}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

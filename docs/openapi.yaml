@@ -1,0 +1,82 @@
+openapi: 3.0.3
+info:
+  title: ep-auth-service
+  version: 0.1.0
+paths:
+  /internal/tenants/provision:
+    post:
+      summary: Provision tenant keys and default profiles
+      responses:
+        "201": { description: Created }
+  /auth/user/onboard:
+    post:
+      summary: Create a tenant user with a temporary password
+      security: [{ bearerAuth: [] }]
+      responses:
+        "201": { description: Created }
+  /auth/user/login:
+    post:
+      summary: Login with a permanent password
+      responses:
+        "200": { description: Token pair }
+  /auth/user/changepassword:
+    post:
+      summary: Replace temporary password with a permanent password
+      responses:
+        "204": { description: Changed }
+  /auth/user/forgotpassword:
+    post:
+      summary: Generate a new temporary password
+      responses:
+        "200": { description: Temporary password response }
+  /auth/token/refresh:
+    post:
+      summary: Rotate refresh token and issue a new token pair
+      responses:
+        "200": { description: Token pair }
+  /auth/token/invalidate:
+    post:
+      summary: Revoke refresh token
+      responses:
+        "204": { description: Revoked }
+  /auth/.well-known/jwks.json:
+    get:
+      summary: Tenant public signing keys
+      responses:
+        "200": { description: JWKS }
+  /profiles:
+    get:
+      summary: List profiles for current tenant
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Profiles }
+  /permissions:
+    get:
+      summary: List permissions
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Permissions }
+  /assignprofiletouser:
+    post:
+      summary: Assign profile to user
+      security: [{ bearerAuth: [] }]
+      responses:
+        "204": { description: Assigned }
+  /generateb2b:
+    post:
+      summary: Generate B2B token
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Token pair }
+  /generateb2c:
+    post:
+      summary: Generate B2C token
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Token pair }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
