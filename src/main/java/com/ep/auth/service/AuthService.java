@@ -33,12 +33,14 @@ public class AuthService {
     private final JwtService jwtService;
     private final AppProperties properties;
     private final B2bClientRepository b2bClientRepository;
+    private final NotificationEmailClient notificationEmailClient;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public AuthService(UserAccountRepository userRepository, ProfileRepository profileRepository,
                        RefreshTokenRepository refreshTokenRepository, PasswordEncoder passwordEncoder,
                        PasswordGenerator passwordGenerator, PermissionCacheService permissionCacheService,
-                       JwtService jwtService, AppProperties properties, B2bClientRepository b2bClientRepository) {
+                       JwtService jwtService, AppProperties properties, B2bClientRepository b2bClientRepository,
+                       NotificationEmailClient notificationEmailClient) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -48,6 +50,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.properties = properties;
         this.b2bClientRepository = b2bClientRepository;
+        this.notificationEmailClient = notificationEmailClient;
     }
 
     @Transactional
@@ -60,6 +63,7 @@ public class AuthService {
                 tenantId, orgId, email, passwordEncoder.encode(temporaryPassword), true));
         profileRepository.findByTenantAndName(tenantId, profileName)
                 .ifPresent(profile -> profileRepository.assignProfileToUser(user.getId(), profile.getId()));
+        notificationEmailClient.sendTemporaryPassword(tenantId, orgId, user.getId(), user.getEmail(), temporaryPassword);
         return new OnboardUserResponse(user.getId(), user.getEmail(), temporaryPassword);
     }
 
@@ -111,6 +115,7 @@ public class AuthService {
         validateOptionalOrg(user, orgId);
         String temporaryPassword = passwordGenerator.temporaryPassword();
         user.setPassword(passwordEncoder.encode(temporaryPassword), true);
+        notificationEmailClient.sendTemporaryPassword(tenantId, user.getOrgId(), user.getId(), user.getEmail(), temporaryPassword);
         return new OnboardUserResponse(user.getId(), user.getEmail(), temporaryPassword);
     }
 
@@ -217,3 +222,4 @@ public class AuthService {
         }
     }
 }
+
